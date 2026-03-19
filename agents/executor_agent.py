@@ -14,7 +14,7 @@ class ExecutorAgent :
         self.agent = create_user_proxy(
             name=name,
             human_input_mode="NEVER",
-            code_execution_config={"work_dir": "coding", "use_docker": False}
+            code_execution_config={"work_dir": "workspace", "use_docker": False}
         )
         # Register tools with this agent
         self._register_tools()

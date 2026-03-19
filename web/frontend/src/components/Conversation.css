@@ -1,0 +1,33 @@
+/* web/frontend/src/components/Conversation.css */
+
+.conversation-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--color-surface);
+}
+
+.conversation-header {
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: var(--border-width) solid var(--color-border);
+  background-color: var(--color-surface);
+}
+
+.conversation-header h2 {
+  font-size: var(--font-size-lg);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium, 500);
+}
+
+.messages-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-lg);
+  background-color: var(--color-background);
+}
+
+.placeholder {
+  text-align: center;
+  color: var(--color-text-light);
+  margin-top: 50px;
+}

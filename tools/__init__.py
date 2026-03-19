@@ -1,5 +1,13 @@
 #   tools/__init__.py
 
 # ----- Imports -----
-from .file_tools import write_html_file, write_file
-from .code_execution import execute_python_code
+# tools/__init__.py
+from .file_tools import (
+    list_files,
+    read_file,
+    write_file,
+    search_files,
+    grep,
+    get_project_structure
+)
+from .code_execution import execute_command

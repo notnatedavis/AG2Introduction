@@ -1,0 +1,104 @@
+/*   web/frontend/src/App.css */
+
+:root {
+  /* colors */
+  --color-primary: #1e293b;      /* dark text / headings */
+  --color-secondary: #64748b;
+  --color-accent: #10b981;       /* green – used for primary actions */
+  --color-background: #f8fafc;
+  --color-surface: #ffffff;
+  --color-text: #1e293b;
+  --color-text-light: #64748b;
+  --color-border: #e2e8f0;
+
+  /* spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+
+  /* typography */
+  --font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-size-base: 16px;
+  --font-size-sm: 0.875rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+  --font-weight-normal: 400;
+  --font-weight-bold: 700;
+
+  /* borders */
+  --border-radius: 12px;
+  --border-width: 1px;
+
+  /* shadows */
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+/* web/frontend/src/App.css */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  background-color: var(--color-background);
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--space-lg);
+}
+
+.app-header {
+  background-color: var(--color-surface);
+  border-bottom: 2px solid var(--color-border);
+  padding: var(--space-lg) 0;
+  margin-bottom: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--border-radius);
+}
+
+.app-header h1 {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-normal);
+  letter-spacing: -0.5px;
+  margin-left: var(--space-lg);
+}
+
+.app-main {
+  display: flex;
+  gap: var(--space-lg);
+  flex: 1;
+  overflow: hidden;
+}
+
+.left-panel {
+  flex: 0 0 350px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  overflow-y: auto;
+  padding-right: var(--space-sm);
+}
+
+.right-panel {
+  flex: 1;
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius);
+  border: var(--border-width) solid var(--color-border);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+}

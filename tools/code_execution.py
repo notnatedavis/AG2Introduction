@@ -5,6 +5,7 @@
 import subprocess
 import tempfile
 import os
+from config.settings import WORK_DIR
 
 # ----- Helper Functions -----
 def execute_python_code(code: str) -> str :
@@ -20,3 +21,21 @@ def execute_python_code(code: str) -> str :
     finally :
         os.unlink(temp_file)
     return output
+
+def execute_command(command: str) -> str :
+    # Run a shell command inside the workspace directory and return output
+    try :
+        result = subprocess.run(
+            command,
+            shell=True,
+            cwd=WORK_DIR,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        output = result.stdout + result.stderr
+        return output if output else "(no output)"
+    except subprocess.TimeoutExpired :
+        return "Command timed out after 30 seconds."
+    except Exception as e :
+        return f"Error executing command: {str(e)}"

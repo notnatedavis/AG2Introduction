@@ -9,6 +9,7 @@ import queue
 import time
 from typing import Dict, Optional
 from workflows import run_webpage_workflow, run_coding_workflow
+from workflows.team_workflow import run_team_workflow
 from agents.executor_agent import ExecutorAgent
 from agents.webpage_agent import WebpageAgent
 from agents.coding_agent import CodingAgent
@@ -27,6 +28,7 @@ class AgentSession:
         self.status = "starting"  # starting, running, stopping, finished
         self.messages = []        # store all messages for history
         self.message_queue = queue.Queue()
+        self.user_input_queue = queue.Queue()   # queue for receiving user replies from frontend
         self.thread = None
         self.stop_event = threading.Event()
         self.agents = {}          # store references to agents if needed
@@ -45,6 +47,8 @@ class AgentSession:
                 self._run_webpage_workflow()
             elif self.workflow == "coding" :
                 self._run_coding_workflow()
+            elif self.workflow == "team" :
+                self._run_team_workflow()
             else :
                 raise ValueError(f"Unknown workflow: {self.workflow}")
         except Exception as e :
@@ -107,6 +111,18 @@ class AgentSession:
         
         executor.initiate_chat(coder, message=self.task)
     
+    def _run_team_workflow(self) :
+        # team workflow using group chat – will capture messages via the workflow's own mechanism
+        # We pass the message_queue and user_input_queue so the workflow can stream messages
+        # and receive user input.
+        run_team_workflow(
+            task=self.task,
+            message_queue=self.message_queue,
+            user_input_queue=self.user_input_queue
+        )
+        # Note: The workflow itself handles message capture via overriding receive,
+        # so we don't need separate receive overrides here.
+    
     def _add_message(self, sender: str, content: str) :
         # Store a message and put it in the queue for streaming
         msg = {
@@ -116,6 +132,11 @@ class AgentSession:
         }
         self.messages.append(msg)
         self.message_queue.put(msg)
+    
+    def send_user_input(self, text: str) :
+        # Put a user message into the input queue for the running workflow
+        self.user_input_queue.put(text)
+        self._add_message("user", text)   # also store in message history
     
     def stop(self) :
         # Signal the thread to stop (if possible)

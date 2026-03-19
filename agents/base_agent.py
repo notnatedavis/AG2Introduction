@@ -24,7 +24,7 @@ def create_user_proxy(name: str = "user_proxy",
                       **kwargs) -> UserProxyAgent:
     # factory to create a UserProxyAgent with sensible defaults
     if code_execution_config is None :
-        code_execution_config = {"work_dir": "coding", "use_docker": False}
+        code_execution_config = {"work_dir": "workspace", "use_docker": False}
     return UserProxyAgent(
         name=name,
         human_input_mode=human_input_mode,

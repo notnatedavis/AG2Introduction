@@ -11,8 +11,8 @@ DEFAULT_MODEL = "deepseek-chat"
 DEFAULT_API_BASE = "https://api.deepseek.com/v1"
 
 # ----- Helper Functions -----
-def get_llm_config(model: str = None, temperature: float = 0.2):
-    """Return the LLM configuration dictionary for autogen."""
+def get_llm_config(model: str = None, temperature: float = 0.2) :
+    # Return the LLM configuration dictionary for autogen
     api_key = os.getenv("DEEPSEEK_API_KEY")
     if not api_key:
         raise ValueError("DEEPSEEK_API_KEY not found in environment variables")
@@ -29,6 +29,6 @@ def get_llm_config(model: str = None, temperature: float = 0.2):
         "temperature": temperature,
     }
 
-def set_api_key(key: str):
-    """Helper to set API key programmatically (not recommended for production)."""
+def set_api_key(key: str) :
+    # Helper to set API key programmatically (not recommended for production)
     os.environ["DEEPSEEK_API_KEY"] = key

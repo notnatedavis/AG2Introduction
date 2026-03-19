@@ -1,0 +1,31 @@
+/* web/frontend/src/components/SessionList.css */
+
+.session-list.card {
+  background: var(--color-surface);
+  border-radius: var(--border-radius);
+  padding: var(--space-lg);
+  border: var(--border-width) solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.session-list h2 {
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--space-lg);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium, 500);
+}
+
+.loading,
+.no-sessions {
+  color: var(--color-text-light);
+  text-align: center;
+  padding: var(--space-lg) 0;
+}
+
+.session-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  max-height: 400px;
+  overflow-y: auto;
+}
