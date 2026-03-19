@@ -24,9 +24,11 @@ update
 1. `git clone` & `cd AG2Introduction` in
 2. create a python virtual environment
    - `python -m venv venv` on Windows , `python3 -m venv venv` on macOS
-4. activate virtual environment
-   - `python`
-6. x
+3. activate virtual environment
+   - `venv\Scripts\activate` on Windows , `source venv/bin activate` on macOS
+4. download prerequisites
+   - `pip install -r requirements.txt` on Windows , `pip3 install -r requirements.txt` on macOS
+5. Copy `.env.example` file to virtual environment created , update `your_api_key_here` with actual deepseek api key
 
 ## Configuration
 
@@ -34,8 +36,34 @@ update
 
 ## Project-Structure
 
-repo/
-- `file`
+AG2Introduction/
+├── agents/
+│   ├── `__init__.py`
+│   ├── `base_agent.py`
+│   ├── `coding_agent.py`
+│   ├── `executor_agent.py`
+│   └── `webpage_agent.py`
+├── config/
+│   ├── `__init__.py`
+│   ├── `llm_config.py`
+│   └── `settings.py`
+├── tools/
+│   ├── `__init__.py`
+│   ├── `code_execution.py`
+│   └── `file_tools.py`
+├── utils/
+│   ├── `__init__.py`
+│   ├── `helpers.py`
+│   └── `logging_utils.py`
+├── workflows/
+│   ├── `__init__.py`
+│   ├── `coding_workflow.py`
+│   └── `webpage_workflow.py`
+├── `.env.example`
+├── `.gitignore`
+├── `main.py`
+├── `ReadMe.md`
+└── `requirements.txt`
 
 ## Additional-Info
 
