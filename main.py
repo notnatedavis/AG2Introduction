@@ -1,5 +1,5 @@
 #   main.py
-#   Entry point to run different workflows
+#   Entry point to run different workflows or launch web interface
 
 # ----- Imports -----
 import argparse
@@ -9,14 +9,20 @@ from utils.logging_utils import setup_logging
 # ----- Main -----
 def main() :
     setup_logging()
-    parser = argparse.ArgumentParser(description="Run AG2 workflows")
-    parser.add_argument("workflow", choices=["webpage", "coding"], help="Workflow to run")
-    parser.add_argument("--task", type=str, help="Task description (optional)")
+    parser = argparse.ArgumentParser(description="Run AG2 workflows or web interface")
+    parser.add_argument("mode", nargs="?", choices=["webpage", "coding", "web"], 
+                        default="web", help="Mode: workflow name or 'web' for web interface")
+    parser.add_argument("--task", type=str, help="Task description (optional for workflows)")
     args = parser.parse_args()
     
-    if args.workflow == "webpage" :
+    if args.mode == "web":
+        # Launch web server
+        from web.app import create_app
+        app = create_app()
+        app.run(debug=True, host="127.0.0.1", port=5000)
+    elif args.mode == "webpage" :
         run_webpage_workflow(args.task)
-    elif args.workflow == "coding" :
+    elif args.mode == "coding" :
         if not args.task :
             args.task = input("Enter coding task: ")
         run_coding_workflow(args.task)
