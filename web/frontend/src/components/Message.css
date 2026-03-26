@@ -50,3 +50,14 @@
 .message-content {
   white-space: pre-wrap;
 }
+
+/* Optional: connection warning style (used in Conversation) */
+.connection-warning {
+  font-size: var(--font-size-sm);
+  color: #f97316;
+  background: #fff3e0;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--border-radius);
+  margin-left: var(--space-md);
+  display: inline-block;
+}

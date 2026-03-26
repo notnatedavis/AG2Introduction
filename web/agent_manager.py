@@ -1,12 +1,12 @@
 #   web/agent_manager.py
-#   Manages active agent sessions 
-#   (create, stop, list, message streaming)
+#   Added detailed logging in message addition for debugging
 
 # ----- Imports -----
 import uuid
 import threading
 import queue
 import time
+import logging
 from typing import Dict, Optional
 from workflows import run_webpage_workflow, run_coding_workflow
 from workflows.team_workflow import run_team_workflow
@@ -16,10 +16,18 @@ from agents.coding_agent import CodingAgent
 import autogen
 from autogen import register_function
 from tools.file_tools import write_html_file
+from utils.logging_utils import StructuredLogger
+
+# constants
+MAX_MESSAGES_PER_SESSION = 200
+INACTIVITY_TIMEOUT_SECONDS = 120   # 2 minutes
+
+# Setup logger
+logger = logging.getLogger(__name__)
 
 # ----- AgentSession Class -----
-class AgentSession:
-    # Represents a running agent workflow session
+class AgentSession :
+    # represents a running agent workflow session
     
     def __init__(self, session_id: str, workflow: str, task: str) :
         self.session_id = session_id
@@ -32,12 +40,21 @@ class AgentSession:
         self.thread = None
         self.stop_event = threading.Event()
         self.agents = {}          # store references to agents if needed
-    
+        self.logger = StructuredLogger(session_id)
+        self.message_count = 0
+        self.last_activity_time = time.time()
+        self.stop_event = threading.Event()
+        self.watchdog_thread = None
+
     def start(self) :
-        # launch the workflow in a background thread
+        # launch the workflow in a background thread + start watchdog
         self.thread = threading.Thread(target=self._run_workflow)
         self.thread.daemon = True
         self.thread.start()
+        # start watchdog thread to monitor activity
+        self.watchdog_thread = threading.Thread(target=self._watchdog)
+        self.watchdog_thread.daemon = True
+        self.watchdog_thread.start()
     
     def _run_workflow(self) :
         # execute the appropriate workflow with message capturing
@@ -51,12 +68,15 @@ class AgentSession:
                 self._run_team_workflow()
             else :
                 raise ValueError(f"Unknown workflow: {self.workflow}")
+        except TimeoutError as e :
+            self._add_message("system", f"Workflow timed out: {e}")
         except Exception as e :
             self._add_message("system", f"Error: {str(e)}")
         finally :
             self.status = "finished"
             self._add_message("system", "Workflow finished.")
-    
+            self.logger.close()
+
     def _run_webpage_workflow(self) : 
         # custom webpage workflow that captures messages
         # create agents
@@ -114,27 +134,71 @@ class AgentSession:
     def _run_team_workflow(self) :
         # team workflow using group chat – will capture messages via the workflow's own mechanism
         # We pass the message_queue and user_input_queue so the workflow can stream messages
-        # and receive user input.
+        # and receive user input
+
+        from workflows.team_workflow import run_team_workflow
+        
         run_team_workflow(
             task=self.task,
             message_queue=self.message_queue,
-            user_input_queue=self.user_input_queue
+            user_input_queue=self.user_input_queue,
+            timeout_seconds=300,
+            logger=self.logger
         )
+
         # Note: The workflow itself handles message capture via overriding receive,
         # so we don't need separate receive overrides here.
     
-    def _add_message(self, sender: str, content: str) :
-        # Store a message and put it in the queue for streaming
+    def _add_message(self, sender: str, content: str, metadata: Optional[Dict] = None) :
+        # store msg -> put in queue -> write to structured log
+        # Ensure content is a string (handle dict responses)
+        if isinstance(content, dict) :
+            content = content.get('content', str(content))
+        elif content is None :
+            content = ''
+        
         msg = {
             'sender': sender,
             'content': content,
             'timestamp': time.time()
         }
+        if metadata:
+            msg['metadata'] = metadata
+        
         self.messages.append(msg)
         self.message_queue.put(msg)
-    
+        self.message_count += 1
+        self.last_activity_time = time.time()
+        
+        # Debug logging to verify queue population
+        logger.debug(f"Session {self.session_id}: Added message from {sender} (queue size: {self.message_queue.qsize()})")
+
+        # log to structured log
+        self.logger.log_message(sender, content, metadata)
+
+        # Safety: stop if message count exceeds limit
+        if self.message_count > MAX_MESSAGES_PER_SESSION :
+            self.status = "stopping"
+            self.stop_event.set()
+            self._add_message("system", f"Maximum messages ({MAX_MESSAGES_PER_SESSION}) reached. Stopping session.")
+
+    def _watchdog(self) :
+        # Periodically check for inactivity and stop if necessary
+        while not self.stop_event.is_set() :
+            time.sleep(10)  # Check every 10 seconds
+            if self.status == "running" :
+                now = time.time()
+                if now - self.last_activity_time > INACTIVITY_TIMEOUT_SECONDS :
+                    self.status = "stopping"
+                    self.stop_event.set()
+                    self._add_message("system", f"Inactivity timeout ({INACTIVITY_TIMEOUT_SECONDS}s) reached. Stopping session.")
+                    break
+
     def send_user_input(self, text: str) :
         # Put a user message into the input queue for the running workflow
+        if self.status == "finished" :
+            raise RuntimeError("Cannot send user input: session already finished")
+    
         self.user_input_queue.put(text)
         self._add_message("user", text)   # also store in message history
     
@@ -142,15 +206,14 @@ class AgentSession:
         # Signal the thread to stop (if possible)
         self.status = "stopping"
         self.stop_event.set()
-        # Note: AG2 doesn't have a clean way to stop a running chat.
-        # We'll rely on the thread finishing naturally.
-        # For now, we just mark it as stopping and remove the session.
-        # In a more advanced implementation, you could inject a termination message.
-    
+        # no further action needed; the workflow will eventually exit
+        # when the timeout or max messages is reached.
+
     def get_messages(self) :
         return self.messages
 
 # ----- AgentManager Singleton -----
+
 class AgentManager :
     # Singleton to manage all active sessions
     
@@ -163,6 +226,7 @@ class AgentManager :
         session = AgentSession(session_id, workflow, task)
         self.sessions[session_id] = session
         session.start()
+        logger.info(f"Created session {session_id} ({workflow})")
         return session_id
     
     def stop_session(self, session_id: str) -> bool :
@@ -171,6 +235,7 @@ class AgentManager :
             session = self.sessions[session_id]
             session.stop()
             del self.sessions[session_id]
+            logger.info(f"Stopped session {session_id}")
             return True
         return False
     

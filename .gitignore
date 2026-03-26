@@ -211,3 +211,5 @@ workspace/
 web/frontend/node_modules/
 *.html
 *.txt
+package-lock.json
+logs/

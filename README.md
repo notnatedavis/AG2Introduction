@@ -15,9 +15,35 @@ AG2 is a framework that allows you to create multiple AI agents that talk to eac
 
 update
 
+---
+
 ## Features
 
-- features
+### Safety & Determinism
+To prevent runaway workflows, the following safeguards are in place :
+- **Chat Timeout**: Each workflow is limited to 5 minutes of execution time.
+- **Message Limit**: Sessions are stopped after 200 messages to avoid infinite loops.
+- **Inactivity Timeout**: If no new message appears for 2 minutes, the session is terminated.
+- **Termination Signal**: All agents are instructed to reply `TERMINATE` when their task is complete; the system respects this signal and ends the workflow.
+- These limits can be adjusted in `web/agent_manager.py` by modifying the constants `MAX_MESSAGES_PER_SESSION`, `INACTIVITY_TIMEOUT_SECONDS`, and the timeout value passed to `run_team_workflow`.
+
+### Security & Least Privilege
+To protect the system from unintended actions, the following security measures are enforced:
+- **Human‑in‑the‑loop (HITL)** for dangerous tools: `write_file`, `write_html_file`, and `execute_command` require explicit user approval before execution.
+- **Read‑only by default**: Shell commands are checked against a whitelist of read‑only commands (e.g., `ls`, `cat`, `grep`). Any command not in the whitelist (or any write operation) triggers an approval request.
+- **Clear tool descriptions**: All tool names and descriptions indicate whether they are read (`[READ]`), write (`[WRITE]`), or execute (`[EXECUTE]`) operations, helping agents (and humans) understand the permission level.
+- The approval mechanism uses the same user input queue as the conversation, so the frontend can display approval prompts and wait for user response
+
+### Observability & Logging
+To support debugging and replayability, every agent session produces a structured log file in `logs/session_<id>.jsonl`. Each line is a JSON object with a `type` field. The logs capture :
+- **System prompts** of all agents at session start.
+- **Every conversation message** (sender, content, timestamp).
+- **Tool calls** (agent, tool name, arguments) and **tool outputs**.
+- **Token usage** (if provided by the LLM).
+- These logs can be replayed or analyzed to understand the exact decision path of the agents.
+- To disable logging, simply omit the `logger` argument when calling workflows.
+
+---
 
 ## Usage 
 
@@ -32,9 +58,13 @@ update
 6. Launch Flask backend API `python main.py web` on Windows , `python3 main.py web` on macOS
 7. `cd web/frontend` + `npm install` + `npm start`
 
+---
+
 ## Configuration
 
 - update
+
+---
 
 ## Project-Structure
 
@@ -43,7 +73,12 @@ AG2Introduction/
    - `__init__.py`  
    - `base_agent.py`  
    - `coding_agent.py`  
+   - `documenter.py`
    - `executor_agent.py`  
+   - `manager_agent.py`
+   - `reviewer_agent.py`
+   - `tester_agent.py`
+   - `tool_executor_agent.py`
    - `webpage_agent.py`  
 - config/  
    - `__init__.py`  
@@ -53,6 +88,7 @@ AG2Introduction/
    - `__init__.py`  
    - `code_execution.py`  
    - `file_tools.py`  
+   - `tool_security.py`
 - utils/  
    - `__init__.py`  
    - `helpers.py`  
@@ -65,6 +101,8 @@ AG2Introduction/
          - components/  
             - `Conversation.css`
             - `Conversation.js`
+            - `GraphPanel.css`
+            - `GraphPanel.js`
             - `Message.css`
             - `Message.js`
             - `NewSessionForm.css`
@@ -86,12 +124,15 @@ AG2Introduction/
 - workflows/  
    - `__init__.py`    
    - `coding_workflow.py`  
+   - `team_workflow.py`
    - `webpage_workflow.py`  
 - `.env.example`  
 - `main.py`  
-- `requirements.txt`  
 - `.gitignore`  
 - `ReadMe.md`  
+- `requirements.txt`  
+
+---
 
 ## Additional-Info
 

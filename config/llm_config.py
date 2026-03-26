@@ -13,15 +13,15 @@ DEFAULT_API_BASE = "https://api.deepseek.com/v1"
 # ----- Helper Functions -----
 def get_llm_config(model: str = None, temperature: float = 0.2) :
     # Return the LLM configuration dictionary for autogen
-    api_key = os.getenv("DEEPSEEK_API_KEY")
+    api_key = os.getenv("GROQ_API_KEY")
     if not api_key:
-        raise ValueError("DEEPSEEK_API_KEY not found in environment variables")
+        raise ValueError("API key not found in environment variables")
     
     config_list = [
         {
-            "model": model or DEFAULT_MODEL,
+            "api_type": "groq",
+            "model": model or "llama-3.3-70b-versatile", # <-- Change the model name
             "api_key": api_key,
-            "base_url": DEFAULT_API_BASE,
         }
     ]
     return {

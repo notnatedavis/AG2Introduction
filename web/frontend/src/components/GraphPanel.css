@@ -1,0 +1,57 @@
+/*   web/frontend/src/components/GraphPanel.css */
+
+.graph-panel-container {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.graph-panel-container.collapsed {
+  border-bottom: none;
+  text-align: center;
+  padding: var(--space-sm);
+  background: var(--color-background);
+}
+
+.graph-panel-container.expanded {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.graph-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.graph-panel-header h3 {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.graph-panel-toggle {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: var(--color-text-light);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--border-radius);
+  transition: background 0.1s;
+}
+
+.graph-panel-toggle:hover {
+  background: var(--color-background);
+  color: var(--color-accent);
+}
+
+.graph-canvas {
+  background: #111122;
+  display: block;
+  overflow: hidden;
+}

@@ -1,15 +1,20 @@
 #   web/routes.py
+#   Enhanced SSE streaming with context preservation and detailed logging
 
 # ----- Imports -----
-from flask import render_template, request, jsonify, Response, send_from_directory
+from flask import render_template, request, jsonify, Response, send_from_directory, stream_with_context
 import json
 import os
+import logging
 from .agent_manager import agent_manager
+from queue import Empty
+
+# Setup logger for this module
+logger = logging.getLogger(__name__)
 
 # ----- Main -----
 def register_routes(app) :
     
-    # API endpoints (unchanged)
     @app.route('/api/sessions', methods=['GET'])
     def list_sessions():
         sessions = agent_manager.list_sessions()
@@ -36,18 +41,27 @@ def register_routes(app) :
                 yield f"event: error\ndata: Session not found\n\n"
                 return
             session = agent_manager.get_session(session_id)
-            if session and session.messages :
-                for msg in session.messages :
-                    yield f"data: {json.dumps(msg)}\n\n"
+            try :
+                if session and session.messages :
+                    for msg in session.messages :
+                        yield f"data: {json.dumps(msg)}\n\n"
+            except Exception as e : 
+                logger.error(f"Error replaying messages for {session_id}: {e}")
+                # Continue anyway – don't kill the generator
+
             while True :
                 try :
-                    msg = queue.get(timeout=30)
+                    msg = queue.get(timeout=15)   # shorter timeout for faster heartbeats
                     yield f"data: {json.dumps(msg)}\n\n"
-                except :
+                except Empty:
                     yield f": heartbeat\n\n"
+                except Exception as e:
+                    logger.error(f"Unexpected error in SSE generator for {session_id}: {e}")
+                    # Keep going – don't break the connection
                     continue
-        return Response(generate(), mimetype="text/event-stream")
 
+        return Response(stream_with_context(generate()), mimetype="text/event-stream")
+    
     @app.route('/api/sessions/<session_id>/control', methods=['POST'])
     def send_control(session_id) :
         data = request.get_json()
@@ -70,13 +84,15 @@ def register_routes(app) :
     def send_message(session_id) :
         data = request.get_json()
         message = data.get('message')
-        if not message:
+        if not message :
             return jsonify({'error': 'Message required'}), 400
 
         session = agent_manager.get_session(session_id)
-        if not session:
+        if not session :
             return jsonify({'error': 'Session not found'}), 404
 
-        # Feed the message into the session's user input queue
-        session.send_user_input(message)
+        try :
+            session.send_user_input(message)
+        except RuntimeError as e :
+            return jsonify({'error': str(e)}), 409
         return jsonify({'success': True})

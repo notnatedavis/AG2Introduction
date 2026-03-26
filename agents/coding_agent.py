@@ -12,7 +12,7 @@ class CodingAgent :
             "- Use `get_project_structure` to see the layout\n"
             "- Use `read_file` to examine relevant files\n"
             "Then propose your changes clearly and ask the user for permission. Only after approval call `write_file`.\n"
-            "Follow the project's coding style. When done, indicate completion.\n"
+            "Follow the project's coding style. When you have finished coding and the code is ready, output 'CODE_COMPLETE'.\n"
             "Reply 'TERMINATE' when the task is complete."
         )
         self.agent = create_assistant_agent(name, system_message)

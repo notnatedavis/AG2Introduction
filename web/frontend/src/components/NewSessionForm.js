@@ -40,6 +40,8 @@ function NewSessionForm({ onSessionCreated }) {
           >
             <option value="webpage">Webpage Designer</option>
             <option value="coding">Coding Assistant</option>
+            <option value="team">Team Orchestration</option>
+
           </select>
         </div>
         <div className="form-group">

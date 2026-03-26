@@ -1,4 +1,4 @@
-/* web/frontend/src/components/Conversation.css */
+/*   web/frontend/src/components/Conversation.css */
 
 .conversation-container {
   display: flex;
@@ -30,4 +30,34 @@
   text-align: center;
   color: var(--color-text-light);
   margin-top: 50px;
+}
+
+.message-input-form {
+  display: flex;
+  padding: var(--space-md);
+  border-top: var(--border-width) solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.message-input-form input {
+  flex: 1;
+  padding: var(--space-sm);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-right: var(--space-sm);
+}
+
+.message-input-form button {
+  background-color: var(--color-accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: var(--space-sm) var(--space-lg);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.message-input-form button:hover {
+  background-color: #059669;
 }

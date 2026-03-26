@@ -19,7 +19,7 @@ def main() :
         # Launch web server
         from web.app import create_app
         app = create_app()
-        app.run(debug=True, host="127.0.0.1", port=5000)
+        app.run(debug=True, host="127.0.0.1", port=5001)
     elif args.mode == "webpage" :
         run_webpage_workflow(args.task)
     elif args.mode == "coding" :

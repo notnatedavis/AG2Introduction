@@ -1,15 +1,18 @@
 //   web/frontend/src/components/Conversation.js
+//   Enhanced SSE handling with connection status and real‑time message logging
 
 // ----- Imports -----
 import React, { useState, useEffect, useRef } from 'react';
 import Message from './Message';
-import { sendMessage } from '../services/api'; // add this
+import GraphPanel from './GraphPanel';
+import { sendMessage } from '../services/api';
 import './Conversation.css';
 
 // ----- Main -----
 function Conversation({ sessionId }) {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
+  const [connectionError, setConnectionError] = useState(false);
   const eventSourceRef = useRef(null);
   const messagesEndRef = useRef(null);
 
@@ -26,29 +29,47 @@ function Conversation({ sessionId }) {
 
     if (!sessionId) {
       setMessages([]);
+      setConnectionError(false);
       return;
     }
 
-    setMessages([]); // clear previous messages
+    setMessages([]);
+    setConnectionError(false);
     const es = new EventSource(`/api/sessions/${sessionId}/messages`);
     eventSourceRef.current = es;
 
-    es.onmessage = (event) => {
-      const msg = JSON.parse(event.data);
-      setMessages(prev => [...prev, msg]);
+    // Connection opened
+    es.onopen = () => {
+      console.log(`SSE connection opened for session ${sessionId}`);
+      setConnectionError(false);
     };
 
-    es.onerror = () => {
-      console.log('SSE error or closed');
-      es.close();
-      eventSourceRef.current = null;
+    // Handle incoming messages
+    es.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        console.log('Received message:', msg);
+        setMessages(prev => {
+          console.log('New messages length:', prev.length + 1);
+          return [...prev, msg];
+        });
+      } catch (err) {
+        console.error('Failed to parse SSE message:', err);
+      }
+    };
+
+    // Handle errors (e.g., connection drop)
+    es.onerror = (event) => {
+      console.error('SSE error:', event);
+      setConnectionError(true);
+      // The browser will automatically attempt to reconnect.
     };
 
     return () => {
       es.close();
       eventSourceRef.current = null;
     };
-  }, [sessionId]); // dependency array now contains only sessionId
+  }, [sessionId]);
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -65,7 +86,14 @@ function Conversation({ sessionId }) {
     <div className="conversation-container">
       <div className="conversation-header">
         <h2>Conversation {sessionId ? `- Session ${sessionId}` : ''}</h2>
+        {connectionError && (
+          <div className="connection-warning">
+            ⚠️ Connection lost. Reconnecting...
+          </div>
+        )}
       </div>
+      {/* New expandable graph panel */}
+      {sessionId && <GraphPanel />}
       <div className="messages-container">
         {messages.map((msg, idx) => (
           <Message key={idx} message={msg} />
@@ -79,13 +107,13 @@ function Conversation({ sessionId }) {
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             placeholder="Type your response..."
+            disabled={connectionError}
           />
-          <button type="submit">Send</button>
+          <button type="submit" disabled={connectionError}>Send</button>
         </form>
       )}
     </div>
   );
 }
-
 
 export default Conversation;
