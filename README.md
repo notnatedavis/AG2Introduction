@@ -68,69 +68,71 @@ To support debugging and replayability, every agent session produces a structure
 
 ## Project-Structure
 
-AG2Introduction/   
-- agents/  
-   - `__init__.py`  
-   - `base_agent.py`  
-   - `coding_agent.py`  
-   - `documenter.py`
-   - `executor_agent.py`  
-   - `manager_agent.py`
-   - `reviewer_agent.py`
-   - `tester_agent.py`
-   - `tool_executor_agent.py`
-   - `webpage_agent.py`  
-- config/  
-   - `__init__.py`  
-   - `llm_config.py`  
-   - `settings.py`  
-- tools/  
-   - `__init__.py`  
-   - `code_execution.py`  
-   - `file_tools.py`  
-   - `tool_security.py`
-- utils/  
-   - `__init__.py`  
-   - `helpers.py`  
-   - `logging_utils.py`  
-- web/  
-   - frontend/  
-      - public/  
-         - `index.html`
-      - src/  
-         - components/  
-            - `Conversation.css`
-            - `Conversation.js`
-            - `GraphPanel.css`
-            - `GraphPanel.js`
-            - `Message.css`
-            - `Message.js`
-            - `NewSessionForm.css`
-            - `NewSessionForm.js`
-            - `SessionItem.css`
-            - `SessionItem.js`
-            - `SessionList.css`
-            - `SessionList.js`
-         - services/  
-            - `api.js`
-         - `App.css`
-         - `App.js`
-         - `index.js`
-      - `package.json`
-   - `__init__.py`  
-   - `agent_manager.py`  
-   - `app.py`  
-   - `routes.py`  
-- workflows/  
-   - `__init__.py`    
-   - `coding_workflow.py`  
-   - `team_workflow.py`
-   - `webpage_workflow.py`  
-- `.env.example`  
-- `main.py`  
-- `.gitignore`  
-- `ReadMe.md`  
-- `requirements.txt`  
+```bash
+AG2Introduction/
+├── ReadMe.md
+├── .env.example
+├── .gitignore
+├── main.py
+├── requirements.txt
+├── agents/
+│   ├── __init__.py
+│   ├── base_agent.py
+│   ├── coding_agent.py
+│   ├── documenter.py
+│   ├── executor_agent.py
+│   ├── manager_agent.py
+│   ├── reviewer_agent.py
+│   ├── tester_agent.py
+│   ├── tool_executor_agent.py
+│   └── webpage_agent.py
+├── config/
+│   ├── __init__.py
+│   ├── llm_config.py
+│   └── settings.py
+├── tools/
+│   ├── __init__.py
+│   ├── code_execution.py
+│   ├── file_tools.py
+│   └── tool_security.py
+├── utils/
+│   ├── __init__.py
+│   ├── helpers.py
+│   └── logging_utils.py
+├── web/
+│   ├── __init__.py
+│   ├── agent_manager.py
+│   ├── app.py
+│   ├── routes.py
+│   └── frontend/
+│       ├── package.json
+│       ├── public/
+│       │   └── index.html
+│       └── src/
+│           ├── App.css
+│           ├── App.js
+│           ├── index.js
+│           ├── components/
+│           │   ├── Conversation.css
+│           │   ├── Conversation.js
+│           │   ├── GraphPanel.css
+│           │   ├── GraphPanel.js
+│           │   ├── Message.css
+│           │   ├── Message.js
+│           │   ├── NewSessionForm.css
+│           │   ├── NewSessionForm.js
+│           │   ├── SessionItem.css
+│           │   ├── SessionItem.js
+│           │   ├── SessionList.css
+│           │   └── SessionList.js
+│           └── services/
+│               └── api.js
+└── workflows/
+    ├── __init__.py
+    ├── coding_workflow.py
+    ├── team_workflow.py
+    └── webpage_workflow.py
+```
 
 ---
 
